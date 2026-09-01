@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080D1A">
+  <title>Marketers World Verticals: un evento che diventa tanti eventi</title>
+  <meta name="description" content="Marketers World Verticals è il nuovo format di Marketers World: una sala, un palinsesto e un aperitivo dedicati al tuo settore, dentro il più grande evento italiano sul digital business. Immobiliare, finance e creator economy hanno già la loro sala. Scopri se c'è anche la tua.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Archivo:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Archivo+Black&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            mw: {
+              dark: '#080D1A',
+              green: '#2EE5A1',
+              'green-light': '#8FFFD1',
+              blue: '#1746F5',
+              gold: '#F4C842',
+              purple: '#b464dc',
+            }
+          },
+          fontFamily: {
+            display: ['Archivo', 'sans-serif'],
+            body: ['Archivo', 'sans-serif'],
+            black: ['Archivo Black', 'Archivo', 'sans-serif'],
+            hand: ['Caveat', 'cursive'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #080D1A; color: #fff; font-family: 'Archivo', sans-serif; overflow-x: hidden; position: relative; }
+
+    .text-grad { background: linear-gradient(135deg, #2EE5A1, #1746F5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .text-grad-gold { background: linear-gradient(135deg, #F4C842, #8FFFD1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* Grain overlay for depth (same technique as marketersworld.net) */
+    .grain {
+      position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.04; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Blueprint grid, matching marketersworld.net's grid-bg utility */
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(26,32,56,0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26,32,56,0.4) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+
+    /* Animated gradient washes, matching marketersworld.net's gw-drift/gw-roam */
+    @keyframes gradient-drift {
+      0%   { transform: translate3d(-8%, -4%, 0) scale(1.1); }
+      33%  { transform: translate3d( 6%,  8%, 0) scale(1.15); }
+      66%  { transform: translate3d(10%, -2%, 0) scale(1.05); }
+      100% { transform: translate3d(-8%, -4%, 0) scale(1.1); }
+    }
+    @keyframes gradient-drift-2 {
+      0%   { transform: translate3d( 8%,  6%, 0) scale(1.05); }
+      33%  { transform: translate3d(-6%, -8%, 0) scale(1.18); }
+      66%  { transform: translate3d(-2%,  4%, 0) scale(1.1); }
+      100% { transform: translate3d( 8%,  6%, 0) scale(1.05); }
+    }
+    .gw-drift  { animation: gradient-drift 18s ease-in-out infinite; }
+    .gw-drift2 { animation: gradient-drift-2 24s ease-in-out infinite; }
+
+    ::selection { background: #1746F5; color: #fff; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #050b1c; }
+    ::-webkit-scrollbar-thumb { background: #1a2860; border-radius: 8px; }
+
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(8,13,26,0); backdrop-filter: blur(0px);
+      transition: background 0.4s, backdrop-filter 0.4s, border-color 0.4s;
+      border-bottom: 1px solid transparent;
+    }
+    #nav.scrolled { background: rgba(8,13,26,0.92); backdrop-filter: blur(16px); border-bottom-color: rgba(255,255,255,0.06); }
+
+    .section-label {
+      font-family: 'Archivo', sans-serif; font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase; color: #2EE5A1;
+    }
+
+    .nav-cta {
+      font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 0.82rem;
+      color: #fff; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 2px;
+      transition: color 0.25s, border-color 0.25s;
+    }
+    .nav-cta:hover { color: #2EE5A1; border-color: #2EE5A1; }
+
+    /* Marquee ticker */
+    .marquee-wrap {
+      overflow: hidden; white-space: nowrap;
+      border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.015);
+    }
+    .marquee-track { display: inline-flex; animation: marquee 32s linear infinite; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .marquee-item {
+      font-family: 'Archivo', sans-serif; font-weight: 700; font-size: clamp(1.1rem, 2.4vw, 1.8rem);
+      letter-spacing: 0.02em; padding: 22px 2rem; display: inline-flex; align-items: center; gap: 2rem;
+    }
+    .marquee-item.on { color: #fff; }
+    .marquee-item.off { color: rgba(255,255,255,0.22); }
+
+    /* Ghost numerals */
+    .ghost-num {
+      font-family: 'Archivo Black', sans-serif; font-weight: 400;
+      font-size: clamp(6rem, 15vw, 12rem); line-height: 1;
+      position: absolute; top: -1.2rem; opacity: 0.14; pointer-events: none; user-select: none; z-index: 0;
+    }
+
+    .mech-num {
+      font-family: 'Archivo Black', sans-serif; font-weight: 400; font-size: clamp(3.2rem, 6vw, 4.6rem);
+      line-height: 1; color: rgba(255,255,255,0.14); flex-shrink: 0; width: 100px;
+    }
+
+    .badge {
+      font-family: 'Archivo', sans-serif; font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 99px; display: inline-block;
+    }
+    .badge-open { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); }
+
+    .link-huge {
+      font-family: 'Archivo Black', sans-serif; font-weight: 400;
+      font-size: clamp(1.5rem, 4.6vw, 2.8rem); color: #fff; text-decoration: none;
+      border-bottom: 2px solid rgba(255,255,255,0.25);
+      transition: border-color 0.3s, color 0.3s; display: inline-block; padding-bottom: 4px;
+    }
+    .link-huge:hover { color: #2EE5A1; border-color: #2EE5A1; }
+
+    .scroll-dot {
+      width: 1px; height: 34px; background: rgba(255,255,255,0.25);
+      animation: dot-fall 1.8s ease-in-out infinite;
+    }
+    @keyframes dot-fall { 0%,100% { transform: scaleY(1); opacity: 0.5; } 50% { transform: scaleY(0.6); opacity: 1; } }
+
+    .roadmap-row { transition: padding-left 0.3s ease, background 0.3s ease; }
+    .roadmap-row:hover { padding-left: 1rem; background: rgba(255,255,255,0.02); }
+
+    /* Real CTA button, same mint-on-navy pairing as marketersworld.net */
+    .btn-mint {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      background: #2EE5A1; color: #080D1A;
+      font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 1rem;
+      padding: 1rem 2.4rem; border-radius: 999px; text-decoration: none;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .btn-mint:hover { transform: scale(1.03); box-shadow: 0 0 40px rgba(46,229,161,0.35); }
+
+    /* Card hover lift, used on pilastri + formato cards */
+    .uplift { transition: transform 0.25s ease, border-color 0.25s ease; }
+    .uplift:hover { transform: translateY(-4px); }
+
+    /* Anchor offset so fixed nav never covers the section title */
+    #tesi, #pilastri, #modello, #roadmap, #contatto { scroll-margin-top: 90px; }
+
+    /* Keyboard accessibility */
+    a:focus-visible, .btn-mint:focus-visible { outline: 2px solid #2EE5A1; outline-offset: 3px; border-radius: 4px; }
+
+    .gsap-fade, .hero-line { opacity: 0; transform: translateY(24px); }
+
+    @media (max-width: 768px) { .hide-mobile { display: none !important; } }
+    @media (max-width: 640px) { .ghost-num { font-size: 5.2rem; opacity: 0.1; } .mech-num { width: 60px; font-size: 2.4rem; } }
+  </style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<!-- NAV -->
+<nav id="nav" class="py-5">
+  <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
+    <a href="https://marketersworld.net">
+      <img src="https://marketersworld.net/wp-content/uploads/2023/11/Logo-MarketersWorld-by-wearemarketers.png"
+           alt="Marketers World" class="h-6 w-auto">
+    </a>
+    <div class="hide-mobile flex items-center gap-8">
+      <a href="#tesi"    class="text-sm text-white/55 hover:text-white transition-colors">La tesi</a>
+      <a href="#pilastri" class="text-sm text-white/55 hover:text-white transition-colors">Le sale già attive</a>
+      <a href="#roadmap" class="text-sm text-white/55 hover:text-white transition-colors">In arrivo</a>
+      <a href="#contatto" class="nav-cta">Prenota il tuo posto</a>
+    </div>
+    <a href="#contatto" class="md:hidden nav-cta">Prenota</a>
+  </div>
+</nav>
+
+
+<!-- HERO -->
+<section class="relative overflow-hidden flex flex-col justify-center" style="min-height: 100vh;">
+  <div class="absolute inset-0 grid-bg"></div>
+  <div class="absolute inset-0" style="overflow:hidden;">
+    <div class="gw-drift" style="position:absolute; width:900px; height:700px; top:-10%; left:-10%; border-radius:50%; background:radial-gradient(ellipse, rgba(23,70,245,0.22) 0%, transparent 65%); filter:blur(90px);"></div>
+    <div class="gw-drift2" style="position:absolute; width:800px; height:640px; bottom:-15%; right:-10%; border-radius:50%; background:radial-gradient(ellipse, rgba(46,229,161,0.16) 0%, transparent 65%); filter:blur(90px);"></div>
+  </div>
+
+  <div class="relative max-w-5xl mx-auto px-6 pt-32 pb-20 w-full">
+    <p class="section-label mb-9 hero-line">Marketers World Verticals</p>
+
+    <h1 class="font-display font-bold leading-[0.96] tracking-tight hero-line" style="font-size: clamp(2.3rem, 6.6vw, 5rem);">Il tuo settore</h1>
+    <h1 class="font-display italic font-bold leading-[0.96] tracking-tight text-grad-gold hero-line" style="font-size: clamp(2.6rem, 8vw, 6.2rem);">ha una sala tutta sua.</h1>
+    <h1 class="font-display font-bold leading-[0.96] tracking-tight mb-9 hero-line" style="font-size: clamp(2.3rem, 6.6vw, 5rem);">Dentro Marketers World.</h1>
+
+    <p class="text-white/50 text-lg leading-relaxed max-w-lg hero-line">Palco enorme sul digital business. Dentro, una sala che parla solo del tuo settore: i tuoi speaker, il tuo pubblico, il tuo aperitivo.</p>
+  </div>
+
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 text-white/30 text-xs tracking-widest uppercase hero-line font-display">
+    <span>Scorri</span>
+    <span class="scroll-dot"></span>
+  </div>
+</section>
+
+
+<!-- NUMERI -->
+<section class="relative z-10 border-t border-b border-white/8" style="background: rgba(255,255,255,0.015);">
+  <div class="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-10">
+    <div class="gsap-fade">
+      <p class="text-grad" style="font-family:'Archivo Black', sans-serif; font-size: clamp(2.2rem, 4vw, 3rem); line-height:1;">3.000+</p>
+      <p class="text-xs uppercase tracking-wider text-white/50 font-bold mt-3 mb-1">Persone</p>
+      <p class="text-white/40 text-sm leading-snug">Già in sala, a caccia di novità sul digital business.</p>
+    </div>
+    <div class="gsap-fade">
+      <p class="text-grad" style="font-family:'Archivo Black', sans-serif; font-size: clamp(2.2rem, 4vw, 3rem); line-height:1;">6</p>
+      <p class="text-xs uppercase tracking-wider text-white/50 font-bold mt-3 mb-1">Giorni</p>
+      <p class="text-white/40 text-sm leading-snug">Non tre ore di fiera: sei giorni per costruire relazioni vere.</p>
+    </div>
+    <div class="gsap-fade">
+      <p class="text-grad-gold" style="font-family:'Archivo Black', sans-serif; font-size: clamp(2.2rem, 4vw, 3rem); line-height:1;">3</p>
+      <p class="text-xs uppercase tracking-wider text-white/50 font-bold mt-3 mb-1">Settori già dentro</p>
+      <p class="text-white/40 text-sm leading-snug">Immobiliare, Finance e Creator Economy hanno già la loro sala.</p>
+    </div>
+    <div class="gsap-fade">
+      <p class="text-grad-gold" style="font-family:'Archivo Black', sans-serif; font-size: clamp(2.2rem, 4vw, 3rem); line-height:1;">150+</p>
+      <p class="text-xs uppercase tracking-wider text-white/50 font-bold mt-3 mb-1">Posti già prenotati</p>
+      <p class="text-white/40 text-sm leading-snug">Nella sala Immobiliare, prima ancora del lancio pubblico.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- MARQUEE -->
+<div class="marquee-wrap relative z-10">
+  <div class="marquee-track">
+    <div class="marquee-item on">Immobiliare<span class="text-white/15">✦</span></div>
+    <div class="marquee-item on">Finance<span class="text-white/15">✦</span></div>
+    <div class="marquee-item on">Creator Economy<span class="text-white/15">✦</span></div>
+    <div class="marquee-item off">Turismo<span class="text-white/15">✦</span></div>
+    <div class="marquee-item off">Food<span class="text-white/15">✦</span></div>
+    <div class="marquee-item off">Moda<span class="text-white/15">✦</span></div>
+    <div class="marquee-item off">Professionisti<span class="text-white/15">✦</span></div>
+    <div class="marquee-item on">Immobiliare<span class="text-white/15">✦</span></div>
+    <div class="marquee-item on">Finance<span class="text-white/15">✦</span></div>
+    <div class="marquee-item on">Creator Economy<span class="text-white/15">✦</span></div>
+    <div class="marquee-item off">Turismo<span class="text-white/15">✦</span></div>
+    <div class="marquee-item off">Food<span class="text-white/15">✦</span></div>
+    <div class="marquee-item off">Moda<span class="text-white/15">✦</span></div>
+    <div class="marquee-item off">Professionisti<span class="text-white/15">✦</span></div>
+  </div>
+</div>
+
+
+<!-- LA TESI -->
+<section id="tesi" class="py-28 md:py-36">
+  <div class="max-w-4xl mx-auto px-6">
+    <p class="section-label mb-14 gsap-fade">La tesi</p>
+
+    <p class="font-display italic font-bold leading-[1.15] mb-2 gsap-fade" style="font-size: clamp(1.9rem, 4.8vw, 3.2rem); max-width: 720px;">
+      Vieni per il digital business.
+    </p>
+    <p class="font-display italic font-bold leading-[1.15] mb-10 gsap-fade text-grad-gold" style="font-size: clamp(1.9rem, 4.8vw, 3.2rem); max-width: 720px;">
+      Resta per il tuo settore.
+    </p>
+
+    <div class="grid md:grid-cols-[1fr_380px] gap-10 items-start">
+      <p class="text-white/55 text-lg leading-relaxed gsap-fade" style="max-width: 560px;">
+        Le fiere generaliste danno il trend del momento, buono per tutti e specifico per nessuno. La sala del tuo settore dentro Marketers World parla solo di quello che conta per il tuo lavoro, con chi lo vive ogni giorno come te.
+      </p>
+
+      <div class="gsap-fade rounded-2xl p-6" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+        <div class="flex items-center gap-3 mb-4">
+          <img src="img/mattia-bonetti.jpg" alt="Mattia Bonetti" class="w-11 h-11 rounded-full object-cover object-top flex-shrink-0 border border-white/10">
+          <div>
+            <p class="text-sm font-display font-bold">Mattia Bonetti</p>
+            <p class="text-xs text-white/40 font-hand" style="font-size:0.9rem;">Direttore Commerciale, Wearemarketers</p>
+          </div>
+        </div>
+        <p class="font-display italic font-bold text-white/80 leading-snug" style="font-size:1.05rem;">
+          "L'immobiliare fa il venti per cento del PIL. Se i migliori innovatori di un settore passano tre giorni nello stesso posto e parlano la stessa lingua, quello smette di essere un evento di marketing. Diventa una festa degli innovatori di ogni settore."
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- I TRE PILASTRI -->
+<section id="pilastri" class="py-20">
+  <div class="max-w-6xl mx-auto px-6">
+    <p class="section-label mb-4 gsap-fade">Già attive</p>
+    <p class="font-display italic font-bold text-xl md:text-2xl mb-10 gsap-fade" style="max-width: 620px;">Tre settori hanno già la loro sala. Ecco cosa trovi dentro.</p>
+
+    <div class="grid md:grid-cols-3 gap-6">
+
+      <!-- Building Production -->
+      <div class="gsap-fade uplift rounded-2xl p-7 flex flex-col" style="background: rgba(244,200,66,0.05); border: 1px solid rgba(244,200,66,0.2); border-top: 3px solid #F4C842;">
+        <div class="flex items-center justify-between mb-5">
+          <p class="section-label" style="color:#F4C842;">Immobiliare · in collaborazione con</p>
+          <p class="font-black text-lg" style="color:#F4C842; opacity:0.35;">01</p>
+        </div>
+        <div class="rounded-xl mb-5 flex items-center justify-center" style="background:#fff; min-height:110px; padding:1.5rem;">
+          <img src="assets/building-production-logo.svg" alt="Building Production" class="h-14 w-auto object-contain">
+        </div>
+        <div class="flex gap-2 mb-5">
+          <span class="badge" style="background:rgba(244,200,66,0.15); color:#F4C842; border:1px solid rgba(244,200,66,0.3);">Sala</span>
+          <span class="badge" style="background:rgba(244,200,66,0.15); color:#F4C842; border:1px solid rgba(244,200,66,0.3);">Palinsesto</span>
+          <span class="badge" style="background:rgba(244,200,66,0.15); color:#F4C842; border:1px solid rgba(244,200,66,0.3);">Aperitivo</span>
+        </div>
+        <p class="text-white/55 text-sm leading-relaxed mb-5">
+          Sala del venerdì curata da Daniele Scatassi: il SEO di Idealista e il global customer partner di YouTube tra gli speaker confermati. 150 posti già prenotati prima del lancio pubblico.
+        </p>
+        <div class="pt-4 mt-auto" style="border-top: 1px solid rgba(255,255,255,0.08);">
+          <p class="text-xs uppercase tracking-wider text-white/35 mb-2 font-display font-bold">Impatto digitale sul settore</p>
+          <p class="text-white/60 text-sm leading-relaxed">La vendita immobiliare si è spostata dal cartello in vetrina al video verticale: tour in 3D, lead qualificati via social, CRM che anticipano la trattativa prima della prima visita.</p>
+        </div>
+      </div>
+
+      <!-- Nova Group -->
+      <div class="gsap-fade uplift rounded-2xl p-7 flex flex-col" style="background: rgba(23,70,245,0.05); border: 1px solid rgba(23,70,245,0.25); border-top: 3px solid #6E93FF;">
+        <div class="flex items-center justify-between mb-5">
+          <p class="section-label" style="color:#6E93FF;">Finance · in collaborazione con</p>
+          <p class="font-black text-lg" style="color:#6E93FF; opacity:0.35;">02</p>
+        </div>
+        <div class="rounded-xl mb-5 flex items-center justify-center" style="background:#0c1330; min-height:110px; padding:1.5rem;">
+          <img src="assets/nova-group-logo.svg" alt="Nova Group" class="h-14 w-auto object-contain">
+        </div>
+        <div class="flex gap-2 mb-5">
+          <span class="badge" style="background:rgba(23,70,245,0.15); color:#6E93FF; border:1px solid rgba(23,70,245,0.3);">Sala</span>
+          <span class="badge" style="background:rgba(23,70,245,0.15); color:#6E93FF; border:1px solid rgba(23,70,245,0.3);">Aperitivo</span>
+        </div>
+        <p class="text-white/55 text-sm leading-relaxed mb-5">
+          Sala Bastioni tua per l'intera giornata, più l'aperitivo tematico riservato a chi lavora nel settore, nel weekend dell'evento.
+        </p>
+        <div class="pt-4 mt-auto" style="border-top: 1px solid rgba(255,255,255,0.08);">
+          <p class="text-xs uppercase tracking-wider text-white/35 mb-2 font-display font-bold">Impatto digitale sul settore</p>
+          <p class="text-white/60 text-sm leading-relaxed">La consulenza finanziaria si è spostata dalla filiale al contenuto educativo su Instagram e TikTok: chi spiega prima i mercati guadagna la fiducia per gestirli davvero.</p>
+        </div>
+      </div>
+
+      <!-- Kolsquare -->
+      <div class="gsap-fade uplift rounded-2xl p-7 flex flex-col" style="background: rgba(180,100,220,0.05); border: 1px solid rgba(180,100,220,0.25); border-top: 3px solid #b464dc;">
+        <div class="flex items-center justify-between mb-5">
+          <p class="section-label" style="color:#b464dc;">Creator economy · in collaborazione con</p>
+          <p class="font-black text-lg" style="color:#b464dc; opacity:0.35;">03</p>
+        </div>
+        <div class="rounded-xl mb-5 flex items-center justify-center" style="background:#fff; min-height:110px; padding:1.5rem;">
+          <img src="assets/kolsquare-logo.png" alt="Kolsquare" class="h-9 w-auto object-contain">
+        </div>
+        <div class="flex gap-2 mb-5">
+          <span class="badge" style="background:rgba(180,100,220,0.15); color:#b464dc; border:1px solid rgba(180,100,220,0.3);">Aperitivo</span>
+        </div>
+        <p class="text-white/55 text-sm leading-relaxed mb-5">
+          Solo l'aperitivo, ma è il momento in cui tutta la creator economy della community si ritrova nello stesso posto.
+        </p>
+        <div class="pt-4 mt-auto" style="border-top: 1px solid rgba(255,255,255,0.08);">
+          <p class="text-xs uppercase tracking-wider text-white/35 mb-2 font-display font-bold">Impatto digitale sul settore</p>
+          <p class="text-white/60 text-sm leading-relaxed">Il rapporto tra brand e creator è passato dalla sponsorizzazione una tantum a infrastrutture di dati: piattaforme che incrociano audience, performance e budget in tempo reale.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- IL FORMATO -->
+<section id="modello" class="py-28">
+  <div class="max-w-6xl mx-auto px-6">
+    <p class="section-label mb-4 gsap-fade">Il modello</p>
+    <p class="font-display italic font-bold text-2xl md:text-3xl mb-6 gsap-fade" style="max-width:620px;">Cosa puoi vivere nella sala del tuo settore.</p>
+    <p class="text-white/50 leading-relaxed mb-12 gsap-fade" style="max-width: 620px;">Sala, aperitivo, hospitality: tre modi di vivere il tuo settore dentro Marketers World. Nella sala Immobiliare li trovi tutti e tre. In quella Finance, sala e aperitivo. Nella Creator economy, solo l'aperitivo, ma con tutto il pubblico creator riunito in una serata.</p>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="gsap-fade uplift rounded-2xl p-8" style="background: rgba(46,229,161,0.06); border: 1px solid rgba(46,229,161,0.25); border-top: 3px solid #2EE5A1;">
+        <div class="mb-4" style="font-size:2.75rem;">🎤</div>
+        <h4 class="font-display font-bold text-xl mb-2">Sala tematica</h4>
+        <p class="text-white/55 text-sm leading-relaxed">Palinsesto dedicato costruito insieme al partner, formazione verticale, ospiti che il pubblico riconosce davvero.</p>
+      </div>
+
+      <div class="gsap-fade uplift rounded-2xl p-8" style="background: rgba(23,70,245,0.06); border: 1px solid rgba(23,70,245,0.3); border-top: 3px solid #6E93FF;">
+        <div class="mb-4" style="font-size:2.75rem;">🥂</div>
+        <h4 class="font-display font-bold text-xl mb-2">Aperitivo tematico</h4>
+        <p class="text-white/55 text-sm leading-relaxed">Il momento per incontrare e chiacchierare con chi si interessa e muove i passi nel tuo settore, lontano dal palco.</p>
+      </div>
+
+      <div class="gsap-fade uplift rounded-2xl p-8" style="background: rgba(244,200,66,0.06); border: 1px solid rgba(244,200,66,0.25); border-top: 3px solid #F4C842;">
+        <div class="mb-4" style="font-size:2.75rem;">🏕️</div>
+        <h4 class="font-display font-bold text-xl mb-2">Hospitality</h4>
+        <p class="text-white/55 text-sm leading-relaxed">Aree dedicate dentro il Village per vivere un'esperienza ancora più immersiva di co-living e mastermind con chi lavora nel tuo stesso mercato.</p>
+      </div>
+    </div>
+
+    <p class="text-white/40 text-sm leading-relaxed mt-10 gsap-fade" style="max-width: 620px;">Quante di queste tre trovi nella sala del tuo settore dipende da quanto quel settore è già cresciuto dentro Marketers World.</p>
+  </div>
+</section>
+
+
+<!-- IL PROSSIMO CAPITOLO -->
+<section id="roadmap" class="py-28 grid-bg" style="background-color: rgba(10,16,28,0.85);">
+  <div class="max-w-4xl mx-auto px-6">
+    <p class="section-label mb-4 gsap-fade">In arrivo</p>
+    <p class="font-display italic font-bold text-2xl md:text-3xl mb-4 gsap-fade" style="max-width:620px;">Tre settori hanno già la sala. Questi quattro sono i prossimi, scelti guardando i numeri reali dell'economia italiana, non una lista a caso.</p>
+    <p class="text-white/40 text-sm leading-relaxed mb-16 gsap-fade" style="max-width:560px;">Non hanno ancora una sala. Clicca sul tuo per farci sapere che la vuoi: apriamo prima i settori con più richieste.</p>
+
+    <a href="mailto:m.bonetti@wearemarketers.net?subject=Voglio%20la%20sala%20Turismo%20%26%20ospitalit%C3%A0&body=Ciao%20Mattia%2C%0A%0AVorrei%20una%20sala%20dedicata%20a%20Turismo%20%26%20ospitalit%C3%A0%20dentro%20Marketers%20World.%0A%0ANome%3A%20%0ASettore%2Flavoro%3A%20%0APerch%C3%A9%20mi%20servirebbe%3A%20%0A%0AGrazie" class="roadmap-row group flex flex-wrap items-baseline justify-between gap-3 border-t border-white/8 py-8 gsap-fade">
+      <div>
+        <h4 class="font-display italic font-bold text-2xl md:text-3xl mb-2 group-hover:text-mw-gold transition-colors">Turismo &amp; ospitalità</h4>
+        <p class="text-white/45 text-sm max-w-md">È già la categoria più rappresentata nel nostro roster creator. Manca solo la sala.</p>
+      </div>
+      <span class="badge badge-open flex-shrink-0">Chiedi la sala →</span>
+    </a>
+
+    <a href="mailto:m.bonetti@wearemarketers.net?subject=Voglio%20la%20sala%20Food%20%26%20agroalimentare&body=Ciao%20Mattia%2C%0A%0AVorrei%20una%20sala%20dedicata%20a%20Food%20%26%20agroalimentare%20dentro%20Marketers%20World.%0A%0ANome%3A%20%0ASettore%2Flavoro%3A%20%0APerch%C3%A9%20mi%20servirebbe%3A%20%0A%0AGrazie" class="roadmap-row group flex flex-wrap items-baseline justify-between gap-3 border-t border-white/8 py-8 gsap-fade">
+      <div>
+        <h4 class="font-display italic font-bold text-2xl md:text-3xl mb-2 group-hover:text-mw-gold transition-colors">Food &amp; agroalimentare</h4>
+        <p class="text-white/45 text-sm max-w-md">Secondo comparto manifatturiero italiano per fatturato dopo il metalmeccanico, e il settore che sta migrando più in fretta verso l'e-commerce diretto.</p>
+      </div>
+      <span class="badge badge-open flex-shrink-0">Chiedi la sala →</span>
+    </a>
+
+    <a href="mailto:m.bonetti@wearemarketers.net?subject=Voglio%20la%20sala%20Moda%20%26%20beauty&body=Ciao%20Mattia%2C%0A%0AVorrei%20una%20sala%20dedicata%20a%20Moda%20%26%20beauty%20dentro%20Marketers%20World.%0A%0ANome%3A%20%0ASettore%2Flavoro%3A%20%0APerch%C3%A9%20mi%20servirebbe%3A%20%0A%0AGrazie" class="roadmap-row group flex flex-wrap items-baseline justify-between gap-3 border-t border-white/8 py-8 gsap-fade">
+      <div>
+        <h4 class="font-display italic font-bold text-2xl md:text-3xl mb-2 group-hover:text-mw-gold transition-colors">Moda &amp; beauty</h4>
+        <p class="text-white/45 text-sm max-w-md">La categoria con più creator per metro quadro in Italia. La sala racconta la filiera dietro al feed.</p>
+      </div>
+      <span class="badge badge-open flex-shrink-0">Chiedi la sala →</span>
+    </a>
+
+    <a href="mailto:m.bonetti@wearemarketers.net?subject=Voglio%20la%20sala%20Professionisti&body=Ciao%20Mattia%2C%0A%0AVorrei%20una%20sala%20dedicata%20a%20Professionisti%20dentro%20Marketers%20World.%0A%0ANome%3A%20%0ASettore%2Flavoro%3A%20%0APerch%C3%A9%20mi%20servirebbe%3A%20%0A%0AGrazie" class="roadmap-row group flex flex-wrap items-baseline justify-between gap-3 border-t border-b border-white/8 py-8 gsap-fade">
+      <div>
+        <h4 class="font-display italic font-bold text-2xl md:text-3xl mb-2 group-hover:text-mw-gold transition-colors">Professionisti</h4>
+        <p class="text-white/45 text-sm max-w-md">Parla già alla community di Business Genetics: commercialisti e avvocati che nel nostro roster fanno numeri da creator.</p>
+      </div>
+      <span class="badge badge-open flex-shrink-0">Chiedi la sala →</span>
+    </a>
+  </div>
+</section>
+
+
+<!-- CTA -->
+<section id="contatto" class="py-24 relative overflow-hidden">
+  <div class="absolute inset-0" style="
+    background:
+      radial-gradient(ellipse 50% 60% at 20% 40%, rgba(244,200,66,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 50% at 85% 20%, rgba(23,70,245,0.07) 0%, transparent 60%);
+  "></div>
+  <div class="relative max-w-2xl mx-auto px-6 text-center">
+    <p class="section-label mb-6 gsap-fade">Tocca a te</p>
+    <p class="font-display italic font-bold leading-[1.15] mb-6 gsap-fade" style="font-size: clamp(1.8rem, 4.6vw, 3rem); max-width: 600px; margin-left:auto; margin-right:auto;">
+      La sala c'è già. Manca solo il tuo posto dentro.
+    </p>
+    <p class="text-white/50 leading-relaxed mb-10 gsap-fade" style="max-width: 460px; margin-left:auto; margin-right:auto;">
+      Immobiliare, finance e creator economy hanno già la loro sala dentro Marketers World, 16-18 ottobre a Rimini. Prenota il tuo posto e scegli anche il palinsesto del tuo settore, oltre al resto dell'evento.
+    </p>
+
+    <div class="gsap-fade">
+      <a href="https://marketersworld.net" class="btn-mint">
+        Prenota il tuo posto <span aria-hidden="true">→</span>
+      </a>
+      <p class="text-white/30 text-sm mt-5 font-display">16-18 ottobre 2026, Rimini. Posti limitati per sala.</p>
+      <p class="text-white/40 text-sm mt-6 font-display">
+        <a href="mailto:m.bonetti@wearemarketers.net?subject=Voglio%20la%20sala%20del%20mio%20settore&body=Ciao%20Mattia%2C%0A%0AVoglio%20una%20sala%20dedicata%20al%20mio%20settore%20dentro%20Marketers%20World.%0A%0ANome%3A%20%0ASettore%3A%20%0APerch%C3%A9%20mi%20servirebbe%3A%20%0A%0AGrazie" class="underline hover:text-white transition-colors">Il tuo settore non ha ancora la sala? Chiedila tu →</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer style="background:#030710; border-top:1px solid rgba(255,255,255,0.06); position:relative; z-index:10;">
+  <div class="max-w-6xl mx-auto px-6 py-10 flex flex-wrap items-center justify-between gap-4">
+    <img src="https://marketersworld.net/wp-content/uploads/2023/11/Logo-MarketersWorld-by-wearemarketers.png"
+         alt="Marketers World" class="h-6 w-auto opacity-60">
+    <p class="text-xs text-white/30">
+      <a href="https://marketersworld.net" target="_blank" rel="noopener" class="hover:text-white/60 transition-colors">Marketers World</a>
+      · 16-18 Ottobre 2026, Rimini
+    </p>
+    <a href="https://wearemarketers.net/privacy-policy/" class="text-xs text-white/30 hover:text-white/60 transition-colors">Privacy Policy</a>
+  </div>
+</footer>
+
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 60));
+
+gsap.timeline({ defaults: { ease: 'power3.out' } })
+  .to('.hero-line', { opacity: 1, y: 0, duration: 0.9, stagger: 0.12, delay: 0.15 });
+
+gsap.utils.toArray('.gsap-fade').forEach(el => {
+  gsap.to(el, {
+    opacity: 1, y: 0, duration: 0.7, ease: 'power2.out',
+    scrollTrigger: { trigger: el, start: 'top 90%', toggleActions: 'play none none none' }
+  });
+});
+
+gsap.utils.toArray('.ghost-num').forEach(el => {
+  gsap.to(el, {
+    y: -30, ease: 'none',
+    scrollTrigger: { trigger: el.parentElement, start: 'top bottom', end: 'bottom top', scrub: true }
+  });
+});
+</script>
+
+</body>
+</html>

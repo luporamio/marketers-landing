@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F5EEDD">
+<title>OffWorld & Afterworld: il party diffuso di Marketers World</title>
+<meta name="description" content="Sette giorni di convenzioni nel centro storico di Rimini, il Village di Viserba e l'Afterworld al Coconuts. Un solo bracciale apre tutto. 16-18 ottobre 2026.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<style>
+:root{
+  --cream:#F5EEDD; --paper:#FFF9EC; --cream-2:#EFE1BE;
+  --ink:#1A1207; --ink-soft:rgba(26,18,7,0.6);
+  --orange:#E8572A; --sun:#F4B93E; --teal:#0F6E5E;
+  --night:#0A0612; --night-2:#150C24; --night-3:#1F1233;
+  --magenta:#FF2E93; --acid:#C6FF3D; --electric:#3DE7FF;
+  --paper-line: rgba(26,18,7,0.14);
+  /* timeline lane colors: validated for dark-surface CVD separation via dataviz skill validator */
+  --tl-blue:#2E6FE0; --tl-gold:#B37820; --tl-teal:#1E9E7A;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--cream); color:var(--ink);
+  font-family:'Space Grotesk', sans-serif; overflow-x:hidden; position:relative;
+  font-size:16px; line-height:1.5;
+}
+img{max-width:100%; display:block;}
+a{color:inherit;}
+.wrap{max-width:1180px; margin:0 auto; padding:0 6vw;}
+h1,h2,h3,h4{font-family:'Unbounded', sans-serif; font-weight:800; letter-spacing:-0.01em;}
+.eyebrow{
+  font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:0.72rem;
+  letter-spacing:0.18em; text-transform:uppercase;
+}
+.night-text{color:var(--paper);}
+
+/* grain, shared everywhere */
+.grain{
+  position:fixed; inset:0; z-index:50; pointer-events:none; opacity:0.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.dotgrid{
+  background-image:radial-gradient(var(--paper-line) 1.4px, transparent 1.4px);
+  background-size:26px 26px;
+}
+
+::selection{background:var(--orange); color:var(--paper);}
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:var(--cream);}
+::-webkit-scrollbar-thumb{background:var(--ink); border-radius:8px;}
+
+/* NAV */
+#nav{
+  position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:100;
+  background:var(--ink); border-radius:999px; padding:0.55rem 0.6rem 0.55rem 1.3rem;
+  display:flex; align-items:center; gap:1.6rem; box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  max-width:92vw;
+}
+#nav img{height:18px; width:auto; filter:invert(1) brightness(2);}
+#nav .links{display:flex; align-items:center; gap:1.4rem;}
+#nav a.nlink{color:rgba(255,255,255,0.6); font-size:0.82rem; font-weight:600; text-decoration:none; transition:color .2s;}
+#nav a.nlink:hover{color:#fff;}
+#nav a.ncta{
+  background:var(--orange); color:var(--paper); font-family:'Unbounded',sans-serif; font-weight:700;
+  font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; padding:0.6rem 1.1rem; border-radius:999px;
+  text-decoration:none; white-space:nowrap; transition:transform .2s, background .2s;
+}
+#nav a.ncta:hover{background:var(--sun); color:var(--ink); transform:scale(1.04);}
+@media (max-width:820px){ #nav .links a.nlink{display:none;} }
+
+/* STAMPS */
+.stamp{
+  position:absolute; border:2px dashed var(--ink); border-radius:50%;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  font-family:'Permanent Marker', cursive; color:var(--ink); text-transform:uppercase;
+  line-height:1.15; pointer-events:none;
+}
+.stamp.night{border-color:var(--acid); color:var(--acid);}
+
+/* MARQUEE */
+.marquee{overflow:hidden; white-space:nowrap; position:relative; z-index:5;}
+.marquee-track{display:inline-flex; animation:mq 26s linear infinite;}
+.marquee-track.rev{animation-direction:reverse;}
+@keyframes mq{from{transform:translateX(0);} to{transform:translateX(-50%);}}
+.marquee-item{
+  font-family:'Unbounded', sans-serif; font-weight:800; font-size:clamp(1.1rem,2.6vw,1.9rem);
+  padding:0 2.2rem; display:inline-flex; align-items:center; gap:2.2rem; text-transform:uppercase;
+}
+
+/* HERO */
+.hero{
+  position:relative; padding:9.5rem 0 3rem; overflow:hidden;
+  background:
+    radial-gradient(ellipse 60% 50% at 85% 8%, rgba(232,87,42,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 6% 90%, rgba(15,110,94,0.12) 0%, transparent 60%),
+    var(--cream);
+}
+.hero-title{
+  font-size:clamp(3.1rem, 11vw, 8.5rem); line-height:0.86; letter-spacing:-0.02em;
+  text-transform:uppercase; color:var(--ink);
+}
+.hero-title .outline{
+  color:transparent; -webkit-text-stroke:2.5px var(--ink); text-stroke:2.5px var(--ink);
+}
+.hero-sub{
+  font-size:1.15rem; color:var(--ink-soft); max-width:36ch; margin-top:1.6rem; line-height:1.55;
+}
+.hero-cta-row{display:flex; align-items:center; gap:1.3rem; margin-top:2.2rem; flex-wrap:wrap;}
+.btn-solid{
+  display:inline-flex; align-items:center; gap:0.6rem; background:var(--ink); color:var(--paper);
+  font-family:'Unbounded', sans-serif; font-weight:700; font-size:0.92rem;
+  padding:1rem 2rem; border-radius:999px; text-decoration:none; transition:transform .25s, background .25s;
+}
+.btn-solid:hover{background:var(--orange); transform:scale(1.03);}
+.btn-outline{
+  display:inline-flex; align-items:center; gap:0.55rem; background:transparent; color:var(--ink);
+  border:2px solid var(--ink); font-family:'Unbounded', sans-serif; font-weight:700; font-size:0.85rem;
+  padding:0.9rem 1.7rem; border-radius:999px; text-decoration:none; transition:border-color .25s, color .25s;
+}
+.btn-outline:hover{border-color:var(--orange); color:var(--orange);}
+.btn-outline.night{color:var(--paper); border-color:rgba(255,255,255,0.35);}
+.btn-outline.night:hover{border-color:var(--acid); color:var(--acid);}
+.btn-neon{
+  display:inline-flex; align-items:center; gap:0.6rem; background:var(--magenta); color:#1a0210;
+  font-family:'Unbounded', sans-serif; font-weight:800; font-size:1rem;
+  padding:1.05rem 2.3rem; border-radius:999px; text-decoration:none;
+  box-shadow:0 0 0 rgba(255,46,147,0.5); transition:transform .25s, box-shadow .25s;
+}
+.btn-neon:hover{transform:scale(1.04); box-shadow:0 0 55px rgba(255,46,147,0.55);}
+
+/* SECTION LABEL band */
+.band{
+  transform:rotate(-1.3deg); background:var(--ink); color:var(--paper);
+  margin:0 -8vw; padding:0.9rem 0; box-shadow:0 12px 24px rgba(0,0,0,0.12);
+}
+
+/* SECTIONS generic */
+.section{padding:6.5rem 0; position:relative;}
+.section-cream{background:var(--cream);}
+.section-paper{background:var(--cream-2);}
+.section-sun{background:linear-gradient(160deg, var(--sun) 0%, #EFA23A 100%); color:var(--ink);}
+.reveal{opacity:0; transform:translateY(26px);}
+
+/* PULL QUOTE */
+.quote-mark{
+  font-family:'Unbounded', sans-serif; font-weight:900; font-size:clamp(6rem,16vw,13rem);
+  color:var(--sun); line-height:1; position:absolute; top:-2.2rem; left:-1rem; z-index:0; opacity:0.9;
+}
+.pull{
+  font-size:clamp(1.9rem, 4.6vw, 3.1rem); line-height:1.15; max-width:16ch; position:relative; z-index:1;
+}
+.note-card{
+  background:var(--paper); border-radius:4px; padding:2rem 1.9rem 1.7rem; max-width:420px;
+  transform:rotate(-2.2deg); box-shadow:0 18px 34px rgba(26,18,7,0.16); position:relative;
+}
+.note-card::before, .note-card::after{
+  content:""; position:absolute; top:-14px; width:70px; height:26px;
+  background:rgba(244,185,62,0.55); border:1px solid rgba(26,18,7,0.08);
+}
+.note-card::before{left:-14px; transform:rotate(-38deg);}
+.note-card::after{right:-14px; transform:rotate(38deg);}
+.note-quote{font-size:1.12rem; line-height:1.5; font-weight:500;}
+.note-sign{font-family:'Permanent Marker', cursive; font-size:1.25rem; margin-top:1.2rem; color:var(--orange);}
+
+/* TICKET GRID */
+.ticket-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:2.2rem 1.8rem; margin-top:3rem;}
+.ticket{
+  background:var(--paper); border-radius:10px; padding:1.5rem 1.5rem 1.5rem 1.65rem; position:relative;
+  box-shadow:0 14px 26px rgba(26,18,7,0.1); transition:transform .25s, box-shadow .25s;
+  display:flex; align-items:center; gap:1.1rem; min-height:118px;
+}
+.ticket:nth-child(3n+1){transform:rotate(-1.1deg);}
+.ticket:nth-child(3n+2){transform:rotate(0.8deg);}
+.ticket:nth-child(3n+3){transform:rotate(-0.4deg);}
+.ticket:hover{transform:rotate(0deg) translateY(-5px); box-shadow:0 22px 40px rgba(26,18,7,0.18); z-index:2;}
+.ticket .stub{
+  flex-shrink:0; width:1px; align-self:stretch; border-left:2px dashed var(--paper-line); position:relative;
+}
+.ticket .stub::before, .ticket .stub::after{
+  content:""; position:absolute; left:-9px; width:18px; height:18px; border-radius:50%; background:var(--cream);
+}
+.ticket .stub::before{top:-9px;} .ticket .stub::after{bottom:-9px;}
+.ticket-body{flex:1;}
+.ticket-body h4{font-size:1.02rem; font-weight:700; text-transform:none; margin-bottom:0.2rem;}
+.ticket-body p{font-size:0.82rem; color:var(--ink-soft); font-family:'Space Grotesk';}
+.ticket-body .by{font-family:'Space Grotesk'; font-size:0.76rem; color:var(--orange); font-weight:600; margin-top:0.15rem;}
+.ticket-body .deal{font-family:'Space Grotesk'; font-size:0.78rem; color:var(--ink-soft); margin-top:0.3rem; line-height:1.4;}
+.ticket-maps{font-family:'Space Grotesk'; font-size:0.76rem; color:var(--teal); font-weight:600; text-decoration:underline; margin-top:0.4rem; display:inline-block;}
+.ticket-tag{
+  font-family:'Unbounded', sans-serif; font-size:0.62rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.03em; padding:0.35rem 0.6rem; border-radius:999px; white-space:nowrap; text-align:center;
+}
+.ticket-tag.yes{background:rgba(232,87,42,0.14); color:var(--orange); border:1px solid rgba(232,87,42,0.3);}
+.ticket-tag.pending{background:transparent; color:var(--ink-soft); border:1px dashed var(--paper-line);}
+
+.ask-line{margin-top:2.5rem; font-size:0.85rem; color:var(--ink-soft);}
+.ask-line a{text-decoration:underline; color:var(--ink);}
+
+/* VERTICAL MEETUP */
+.vm-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:1.8rem; margin-top:3rem;}
+.vm-card{
+  background:var(--paper); border-radius:14px; padding:1.7rem; box-shadow:0 14px 26px rgba(26,18,7,0.1);
+  display:flex; flex-direction:column; gap:1.1rem; transition:transform .25s, box-shadow .25s;
+}
+.vm-card:hover{transform:translateY(-5px); box-shadow:0 22px 40px rgba(26,18,7,0.18);}
+.vm-logo{
+  height:44px; border:1.5px dashed var(--paper-line); border-radius:8px; display:flex; align-items:center;
+  justify-content:center; font-family:'Unbounded', sans-serif; font-size:0.62rem; letter-spacing:0.06em;
+  text-transform:uppercase; color:var(--ink-soft);
+}
+.vm-time{font-family:'Unbounded', sans-serif; font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--orange);}
+.vm-card h4{font-size:1.15rem; margin-top:0.35rem; text-transform:none;}
+.vm-desc{font-size:0.86rem; color:var(--ink-soft); line-height:1.5; margin-top:0.4rem;}
+.vm-foot{display:flex; align-items:center; justify-content:space-between; gap:0.8rem; padding-top:0.9rem; border-top:1px solid var(--paper-line); margin-top:auto;}
+.vm-link{display:inline-flex; align-items:center; gap:0.4rem; font-size:0.82rem; font-weight:600; color:var(--ink); text-decoration:none; border-bottom:1.5px solid var(--paper-line); padding-bottom:2px; transition:border-color .2s, color .2s;}
+.vm-link:hover{color:var(--orange); border-color:var(--orange);}
+
+/* VILLAGE POSTCARD */
+.postcard{
+  background:var(--paper); border-radius:6px; padding:2.4rem; max-width:520px;
+  box-shadow:0 24px 50px rgba(26,18,7,0.16); transform:rotate(-1.6deg); position:relative;
+}
+.postcard .pstamp{
+  position:absolute; top:22px; right:22px; width:58px; height:70px; border:2px dashed rgba(26,18,7,0.3);
+  display:flex; align-items:center; justify-content:center; font-size:1.6rem; transform:rotate(6deg);
+}
+
+/* AFTERWORLD gradient hinge */
+.afterworld{
+  position:relative; padding:9rem 0 8rem; overflow:hidden; color:var(--paper);
+  background:linear-gradient(180deg, var(--sun) 0%, #C9622B 16%, #7A2E63 42%, var(--night-3) 68%, var(--night) 100%);
+}
+.afterworld .eyebrow{color:rgba(255,255,255,0.75);}
+.aw-title{
+  font-size:clamp(3.2rem, 11vw, 8rem); line-height:0.88; text-transform:uppercase; color:#fff;
+  text-shadow:0 0 26px rgba(255,46,147,0.55), 0 0 70px rgba(61,231,255,0.25);
+}
+.clock{
+  font-family:'Unbounded', sans-serif; font-weight:800; font-size:clamp(3.4rem, 8vw, 6rem); line-height:1;
+  color:var(--acid); text-shadow:0 0 30px rgba(198,255,61,0.5);
+}
+.clock .colon{animation:blink 1.4s steps(1) infinite;}
+@keyframes blink{50%{opacity:0.15;}}
+.aw-card{
+  background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16); backdrop-filter:blur(6px);
+  border-radius:16px; padding:2.2rem; max-width:420px;
+}
+
+/* NIGHT sections */
+.section-night{background:var(--night); color:var(--paper);}
+.section-night .eyebrow{color:var(--acid);}
+.band-line{border-top:1px solid rgba(255,255,255,0.12);}
+
+.wristband{display:flex; align-items:center; justify-content:space-between; gap:1.5rem; margin-top:3.5rem; flex-wrap:wrap;}
+.wb-node{flex:1; min-width:210px; text-align:center; position:relative;}
+.wb-circle{
+  width:78px; height:78px; border-radius:50%; margin:0 auto 1.1rem; display:flex; align-items:center; justify-content:center;
+  font-size:1.9rem; border:2px solid; position:relative; z-index:2;
+}
+.wb-circle.c1{border-color:var(--acid); box-shadow:0 0 24px rgba(198,255,61,0.35);}
+.wb-circle.c2{border-color:var(--sun); box-shadow:0 0 24px rgba(244,185,62,0.35);}
+.wb-circle.c3{border-color:var(--magenta); box-shadow:0 0 24px rgba(255,46,147,0.35);}
+.wb-node h4{font-size:1rem; margin-bottom:0.4rem; color:var(--paper);}
+.wb-node p{font-size:0.82rem; color:rgba(255,255,255,0.55); max-width:26ch; margin:0 auto;}
+.wb-line{position:absolute; top:39px; left:50%; width:100%; height:2px; background:repeating-linear-gradient(90deg, rgba(255,255,255,0.25) 0 10px, transparent 10px 18px); z-index:1;}
+.wb-node:last-child .wb-line{display:none;}
+.wristband.day .wb-node h4{color:var(--ink);}
+.wristband.day .wb-node p{color:var(--ink-soft);}
+.wristband.day .wb-line{background:repeating-linear-gradient(90deg, var(--paper-line) 0 10px, transparent 10px 18px);}
+
+/* GANTT: 5 corsie, martedì-lunedì */
+.gantt{margin-top:3.5rem; overflow-x:auto; padding-bottom:0.5rem;}
+.gantt-grid{
+  display:grid; grid-template-columns:150px repeat(7, minmax(70px,1fr));
+  row-gap:1.4rem; align-items:center; min-width:700px;
+}
+.gantt-grid .day-head{
+  grid-row:1; font-family:'Unbounded', sans-serif; font-size:0.66rem; text-transform:uppercase;
+  letter-spacing:0.05em; color:rgba(255,255,255,0.4); text-align:center; line-height:1.5;
+  padding-bottom:0.9rem; border-bottom:1px solid rgba(255,255,255,0.14);
+}
+.gantt-grid .lane-label{
+  grid-column:1; font-family:'Unbounded', sans-serif; font-weight:700; font-size:0.86rem; color:var(--paper);
+}
+.gantt-bar{height:16px; border-radius:999px; position:relative;}
+.gantt-bar .bar-tag{
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  font-size:0.62rem; font-family:'Unbounded', sans-serif; font-weight:700; color:rgba(10,6,18,0.75); white-space:nowrap;
+}
+/* corsie brevi (sabato): etichetta sopra la barra, confinata nella colonna del giorno */
+.gantt-bar-wrap{display:flex; flex-direction:column; align-items:center; gap:0.4rem;}
+.bar-caption{font-family:'Unbounded', sans-serif; font-size:0.62rem; font-weight:700; color:var(--paper); white-space:nowrap;}
+.gantt-bar-wrap .gantt-bar{width:100%;}
+
+/* MAP */
+#mappa{height:460px; width:100%; border-radius:14px; filter:saturate(1.05) brightness(0.95);}
+.leaflet-popup-content-wrapper{background:var(--night-2); color:var(--paper); border-radius:10px; border:1px solid rgba(255,255,255,0.12);}
+.leaflet-popup-tip{background:var(--night-2);}
+.leaflet-popup-content{font-family:'Space Grotesk', sans-serif; font-size:0.85rem;}
+.leaflet-popup-content b{font-family:'Unbounded', sans-serif; font-size:0.82rem;}
+.leaflet-container a.leaflet-popup-close-button{color:rgba(255,255,255,0.5);}
+.legend{display:flex; flex-wrap:wrap; gap:1.6rem; margin-top:1.6rem;}
+.legend .dot{width:12px; height:12px; border-radius:50%; display:inline-block; margin-right:0.5rem;}
+
+/* CTA */
+.cta{padding:8rem 0; text-align:center; background:var(--night); position:relative; overflow:hidden;}
+.cta::before{
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(ellipse 55% 60% at 30% 30%, rgba(255,46,147,0.14) 0%, transparent 60%),
+             radial-gradient(ellipse 45% 55% at 80% 70%, rgba(61,231,255,0.1) 0%, transparent 60%);
+}
+.cta-title{font-size:clamp(2.1rem, 5.6vw, 3.6rem); color:#fff; max-width:16ch; margin:0 auto 1.4rem; line-height:1.1;}
+.cta p.sub{color:rgba(255,255,255,0.55); max-width:44ch; margin:0 auto 2.4rem; font-size:1.05rem;}
+
+/* FOOTER */
+footer{background:#050308; padding:2.6rem 0; border-top:1px solid rgba(255,255,255,0.08);}
+footer .wrap{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem;}
+footer img{height:20px; opacity:0.5; filter:invert(1) brightness(2);}
+footer p, footer a{font-size:0.75rem; color:rgba(255,255,255,0.35); text-decoration:none;}
+footer a:hover{color:rgba(255,255,255,0.6);}
+
+@media (max-width:720px){
+  .hero{padding-top:7.5rem;}
+  .stamp{display:none;}
+  .wristband{flex-direction:column;}
+  .wb-line{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <img src="https://marketersworld.net/wp-content/uploads/2023/11/Logo-MarketersWorld-by-wearemarketers.png" alt="Marketers World">
+  <div class="links">
+    <a href="#offworld" class="nlink">OffWorld</a>
+    <a href="#village" class="nlink">Village</a>
+    <a href="#afterworld" class="nlink">Afterworld</a>
+    <a href="#dove" class="nlink">Dove</a>
+  </div>
+  <a href="https://marketersworld.net/#biglietti" class="ncta">Prenota</a>
+</nav>
+
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap" style="position:relative;">
+    <div class="stamp reveal" style="width:118px; height:118px; top:6%; right:9%; transform:rotate(9deg); font-size:0.8rem;">16&#8211;18<br>ott 2026</div>
+    <div class="stamp reveal" style="width:96px; height:96px; top:64%; left:0%; transform:rotate(-11deg); font-size:0.72rem;">Rimini<br>centro</div>
+
+    <p class="eyebrow reveal" style="margin-bottom:1.6rem; color:var(--orange);">Marketers World &middot; il party diffuso</p>
+    <h1 class="hero-title reveal">OffWorld</h1>
+    <h1 class="hero-title outline reveal" style="margin-top:-0.05em;">Afterworld</h1>
+
+    <p class="hero-sub reveal">Il palco del Palacongressi chiude alle 19. Fuori, la settimana di Marketers World continua: sette giorni di convenzioni in centro, un Village per dormirci dentro, una notte al Coconuts per chiuderla bene.</p>
+
+    <div class="hero-cta-row reveal">
+      <a href="https://marketersworld.net/#biglietti" class="btn-solid">Prenota il tuo posto</a>
+      <a href="#offworld" class="btn-outline">Scopri come funziona &#8595;</a>
+    </div>
+  </div>
+
+  <div class="marquee band" style="margin-top:4.5rem;">
+    <div class="marquee-track">
+      <div class="marquee-item">&#9733; 7 giorni di convenzioni</div>
+      <div class="marquee-item">&#9733; 10+ locali</div>
+      <div class="marquee-item">&#9733; 1 bracciale, tutto incluso</div>
+      <div class="marquee-item">&#9733; 7 giorni di convenzioni</div>
+      <div class="marquee-item">&#9733; 10+ locali</div>
+      <div class="marquee-item">&#9733; 1 bracciale, tutto incluso</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- TUTTO INCLUSO -->
+<section id="tutto-incluso" class="section section-cream">
+  <div class="wrap">
+    <p class="eyebrow reveal" style="color:var(--orange);">Un ticket, tutto incluso</p>
+    <h2 class="reveal" style="font-size:clamp(1.9rem,4.2vw,2.9rem); max-width:20ch; text-transform:none; margin-top:1rem;">Il ticket MW26 apre OffWorld, Village e Afterworld.</h2>
+    <p class="reveal" style="font-size:1.05rem; color:var(--ink-soft); max-width:58ch; margin-top:1.2rem;">Non ci sono biglietti separati né liste a cui iscriversi. Registrandoti a Marketers World ricevi il bracciale evento: vale per tutte e tre le cose, dal primo aperitivo in centro all'ultima ora al Coconuts.</p>
+
+    <div class="wristband day reveal">
+      <div class="wb-node"><div class="wb-line"></div><div class="wb-circle c1">&#129346;</div><h4>OffWorld</h4><p>Sconto nei locali convenzionati, sette giorni, senza prenotazione.</p></div>
+      <div class="wb-node"><div class="wb-line"></div><div class="wb-circle c2">&#127966;</div><h4>Village</h4><p>Camere e roulotte al Club del Sole, sconto per chi partecipa all'evento.</p></div>
+      <div class="wb-node"><div class="wb-circle c3">&#127769;</div><h4>Afterworld</h4><p>Ingresso al Coconuts la notte del sabato, incluso.</p></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- COS'È OFFWORLD -->
+<section id="cosa-e" class="section section-cream">
+  <div class="wrap">
+    <p class="eyebrow reveal" style="color:var(--teal); margin-bottom:2.2rem;">Cos'è OffWorld</p>
+
+    <div style="display:grid; grid-template-columns:1.15fr 0.85fr; gap:4rem; align-items:start;">
+      <div style="position:relative;">
+        <span class="quote-mark">&#8220;</span>
+        <p class="pull reveal">I contatti che restano si fanno a cena, in un bar, in coda per un drink.</p>
+        <p class="reveal" style="font-size:1.1rem; color:var(--ink-soft); max-width:52ch; margin-top:1.8rem; line-height:1.65;">
+          Quando il pitch è finito e resta solo la conversazione vera. Sala e stand ti fanno incontrare le persone giuste, poi il resto succede altrove. OffWorld porta quell'altrove dentro il programma: il centro storico di Rimini diventa parte dell'evento tanto quanto una sala conferenze.
+        </p>
+      </div>
+
+      <div class="reveal note-card">
+        <p class="note-quote">"Le relazioni che contano nascono fuori dai programmi ufficiali, nei momenti laterali, spontanei, informali ma ben indirizzati. Il centro di Rimini è quello spazio."</p>
+        <p class="note-sign">Mattia Bonetti</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- OFFWORLD: LOCALI -->
+<section id="offworld" class="section section-paper dotgrid">
+  <div class="wrap">
+    <p class="eyebrow reveal" style="color:var(--orange); margin-bottom:1.2rem;">OffWorld</p>
+    <h2 class="reveal" style="font-size:clamp(1.9rem,4.4vw,2.9rem); max-width:16ch; text-transform:none;">Le convenzioni con i locali del centro</h2>
+    <p class="reveal" style="font-size:1.05rem; color:var(--ink-soft); max-width:56ch; margin-top:1.2rem;">Mostri il bracciale, ottieni lo sconto. Entri quando vuoi, nei giorni di convenzione, senza prenotare. La lista si allarga ogni settimana fino all'evento.</p>
+
+    <div class="ticket-grid">
+      <div class="ticket reveal">
+        <div class="ticket-body">
+          <h4>Osteria Delle Poveracce</h4>
+          <p>Vecchia Pescheria</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=Osteria+Delle+Poveracce%2C+Rimini" target="_blank" rel="noopener" class="ticket-maps">Apri in Maps &#8594;</a>
+        </div>
+        <div class="stub"></div><span class="ticket-tag yes">&#8722;10%</span>
+      </div>
+      <div class="ticket reveal">
+        <div class="ticket-body">
+          <h4>Lo Zibaldone</h4>
+          <p>Vecchia Pescheria</p>
+          <p class="deal">10% sul menù per chi mangia, + 20 drink offerti allo staff del locale.</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=Lo+Zibaldone%2C+Rimini" target="_blank" rel="noopener" class="ticket-maps">Apri in Maps &#8594;</a>
+        </div>
+        <div class="stub"></div><span class="ticket-tag yes">&#8722;10%</span>
+      </div>
+      <div class="ticket reveal">
+        <div class="ticket-body">
+          <h4>La Marianna</h4>
+          <p>Borgo San Giuliano &middot; 17&#8211;19 ott</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=La+Marianna%2C+Borgo+San+Giuliano%2C+Rimini" target="_blank" rel="noopener" class="ticket-maps">Apri in Maps &#8594;</a>
+        </div>
+        <div class="stub"></div><span class="ticket-tag yes">&#8722;5%</span>
+      </div>
+      <div class="ticket reveal">
+        <div class="ticket-body">
+          <h4>Pars</h4>
+          <p>Marina Centro</p>
+          <p class="deal">10% su tutto. Menù pizza classica + birra o bibita + dolce a 20&euro; (non cumulabile).</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=Pars%2C+Viale+Vespucci+12%2Fg%2C+Rimini" target="_blank" rel="noopener" class="ticket-maps">Apri in Maps &#8594;</a>
+        </div>
+        <div class="stub"></div><span class="ticket-tag yes">&#8722;10%</span>
+      </div>
+    </div>
+
+    <p class="ask-line reveal">Hai un locale nel centro di Rimini e vuoi entrare in OffWorld? <a href="mailto:a.zannini@wearemarketers.net?subject=Voglio%20entrare%20in%20OffWorld&body=Ciao%20Alessia%2C%0A%0AGestisco%20un%20locale%20nel%20centro%20di%20Rimini%20e%20vorrei%20partecipare%20a%20OffWorld%20a%20Marketers%20World.%0A%0ANome%20locale%3A%20%0AZona%3A%20%0A%0AGrazie">Scrivi qui &#8594;</a></p>
+  </div>
+</section>
+
+
+<!-- VERTICAL MEETUP -->
+<section id="vertical-meetup" class="section section-cream">
+  <div class="wrap">
+    <p class="eyebrow reveal" style="color:var(--orange); margin-bottom:1.2rem;">Vertical Meetup</p>
+    <h2 class="reveal" style="font-size:clamp(1.9rem,4.4vw,2.9rem); max-width:18ch; text-transform:none;">Sabato sera, l'aperitivo lo scegli per settore</h2>
+    <p class="reveal" style="font-size:1.05rem; color:var(--ink-soft); max-width:56ch; margin-top:1.2rem;">Dentro la finestra OffWorld del sabato, alcuni locali diventano il punto di ritrovo di una community precisa: tre ore per parlare con chi fa il tuo stesso lavoro, senza badge né elevator pitch.</p>
+
+    <div class="vm-grid">
+      <div class="vm-card reveal">
+        <div class="vm-logo">Logo Building Production</div>
+        <div>
+          <span class="vm-time">Sab, 19&#8211;22 &middot; Pars</span>
+          <h4>Immobiliare</h4>
+          <p class="vm-desc">Agenti, developer e investitori: un tavolo solo per chi il mattone lo vive ogni giorno.</p>
+        </div>
+        <div class="vm-foot">
+          <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Aperitivo%20Immobiliare%20MW26&dates=20261017T170000Z/20261017T200000Z&details=Vertical%20Meetup%20di%20Marketers%20World%202026%2C%20powered%20by%20Building%20Production.%20Info%3A%20marketersworld.net&location=Pars%2C%20Viale%20Vespucci%2012%2Fg%2C%20Rimini" target="_blank" rel="noopener" class="vm-link">&#128197; Aggiungi al calendario</a>
+          <span class="ticket-tag yes">Confermato</span>
+        </div>
+      </div>
+
+      <div class="vm-card reveal">
+        <div class="vm-logo">Logo Nova Group</div>
+        <div>
+          <span class="vm-time">Sab, 19&#8211;22 &middot; Lo Zibaldone</span>
+          <h4>Finance</h4>
+          <p class="vm-desc">Consulenti finanziari e gestori patrimoniali, stesso linguaggio sul risparmio.</p>
+        </div>
+        <div class="vm-foot">
+          <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Aperitivo%20Finance%20MW26&dates=20261017T170000Z/20261017T200000Z&details=Vertical%20Meetup%20di%20Marketers%20World%202026%2C%20powered%20by%20Nova%20Group.%20Info%3A%20marketersworld.net&location=Lo%20Zibaldone%2C%20Rimini" target="_blank" rel="noopener" class="vm-link">&#128197; Aggiungi al calendario</a>
+          <span class="ticket-tag yes">Confermato</span>
+        </div>
+      </div>
+
+      <div class="vm-card reveal">
+        <div>
+          <span class="vm-time">Sab, 19&#8211;22</span>
+          <h4>AI Lovers</h4>
+          <p class="vm-desc">Chi costruisce, vende o usa l'AI ogni giorno per lavoro.</p>
+        </div>
+        <div class="vm-foot">
+          <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Aperitivo%20AI%20Lovers%20MW26&dates=20261017T170000Z/20261017T200000Z&details=Vertical%20Meetup%20di%20Marketers%20World%202026.%20Location%20in%20via%20di%20conferma.%20Info%3A%20marketersworld.net&location=Rimini" target="_blank" rel="noopener" class="vm-link">&#128197; Aggiungi al calendario</a>
+          <span class="ticket-tag pending">Da pianificare</span>
+        </div>
+      </div>
+
+      <div class="vm-card reveal">
+        <div>
+          <span class="vm-time">Sab, 19&#8211;22</span>
+          <h4>Fitness Addicted</h4>
+          <p class="vm-desc">Personal trainer, box owner e chi il fitness lo vive anche fuori dalla palestra.</p>
+        </div>
+        <div class="vm-foot">
+          <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Aperitivo%20Fitness%20Addicted%20MW26&dates=20261017T170000Z/20261017T200000Z&details=Vertical%20Meetup%20di%20Marketers%20World%202026.%20Location%20in%20via%20di%20conferma.%20Info%3A%20marketersworld.net&location=Rimini" target="_blank" rel="noopener" class="vm-link">&#128197; Aggiungi al calendario</a>
+          <span class="ticket-tag pending">Da pianificare</span>
+        </div>
+      </div>
+
+      <div class="vm-card reveal">
+        <div>
+          <span class="vm-time">Sab, 19&#8211;22</span>
+          <h4>Agency Founders</h4>
+          <p class="vm-desc">Founder di agenzie di marketing, a confronto con chi ci è già passato.</p>
+        </div>
+        <div class="vm-foot">
+          <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Aperitivo%20Agency%20Founders%20MW26&dates=20261017T170000Z/20261017T200000Z&details=Vertical%20Meetup%20di%20Marketers%20World%202026.%20Location%20in%20via%20di%20conferma.%20Info%3A%20marketersworld.net&location=Rimini" target="_blank" rel="noopener" class="vm-link">&#128197; Aggiungi al calendario</a>
+          <span class="ticket-tag pending">Da pianificare</span>
+        </div>
+      </div>
+
+      <div class="vm-card reveal">
+        <div>
+          <span class="vm-time">Sab, 19&#8211;22</span>
+          <h4>Ecommerce &amp; Retail</h4>
+          <p class="vm-desc">Chi vende online o in negozio, stesso discorso su margini e customer acquisition.</p>
+        </div>
+        <div class="vm-foot">
+          <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Aperitivo%20Ecommerce%20%26%20Retail%20MW26&dates=20261017T170000Z/20261017T200000Z&details=Vertical%20Meetup%20di%20Marketers%20World%202026.%20Location%20in%20via%20di%20conferma.%20Info%3A%20marketersworld.net&location=Rimini" target="_blank" rel="noopener" class="vm-link">&#128197; Aggiungi al calendario</a>
+          <span class="ticket-tag pending">Da pianificare</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- VILLAGE -->
+<section id="village" class="section section-sun">
+  <div class="wrap" style="display:grid; grid-template-columns:0.95fr 1.05fr; gap:4rem; align-items:center;">
+    <div class="postcard reveal">
+      <div class="pstamp">&#127966;</div>
+      <p class="eyebrow" style="color:var(--teal); margin-bottom:1rem;">Village</p>
+      <h3 style="font-size:1.7rem; text-transform:none; max-width:14ch; margin-bottom:1rem;">Club del Sole, Viserba</h3>
+      <p style="font-size:0.98rem; color:var(--ink-soft); line-height:1.6;">A pochi minuti dal Palacongressi. Prenotazioni e tariffe su marketersworld.net.</p>
+    </div>
+
+    <div class="reveal">
+      <h2 style="font-size:clamp(1.9rem,4.2vw,2.7rem); text-transform:none; max-width:14ch; margin-bottom:1.4rem;">Dove dormi durante Marketers World.</h2>
+      <p style="font-size:1.08rem; line-height:1.65; max-width:48ch; color:rgba(26,18,7,0.75); margin-bottom:2rem;">
+        Il camping Club del Sole di Viserba diventa per una settimana il villaggio di Marketers World: camere e roulotte, prenotazioni gestite interamente da Club del Sole. È il modo per vivere l'evento anche di notte, tra chi ci va per lo stesso motivo.
+      </p>
+      <a href="https://marketersworld.net/marketers-village" target="_blank" rel="noopener" class="btn-outline">Scopri il Village &#8594;</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- AFTERWORLD (HINGE giorno/notte) -->
+<section id="afterworld" class="afterworld">
+  <div class="wrap">
+    <p class="eyebrow reveal">Afterworld</p>
+    <h2 class="aw-title reveal" style="margin-top:1.2rem;">Sabato notte</h2>
+
+    <div style="display:grid; grid-template-columns:1fr auto; gap:3rem; align-items:end; margin-top:3rem;">
+      <p class="reveal" style="font-size:1.12rem; max-width:46ch; line-height:1.65; color:rgba(255,255,255,0.8);">
+        Quando OffWorld nel centro storico si esaurisce, la festa si sposta al <strong>Coconuts</strong>. Stesso bracciale della giornata, nessun secondo biglietto da cercare: entri, balli, resti quanto vuoi.
+      </p>
+
+      <div class="aw-card reveal">
+        <p class="clock">23<span class="colon">:</span>00</p>
+        <p style="font-size:0.85rem; color:rgba(255,255,255,0.55); margin-top:0.6rem;">Orario indicativo, conferma in arrivo</p>
+        <p style="font-size:0.95rem; margin-top:1rem; color:var(--paper);">Coconuts &middot; zona Ruota Panoramica</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- IL PROGRAMMA: TIMELINE -->
+<section id="programma" class="section section-night band-line">
+  <div class="wrap">
+    <p class="eyebrow reveal">Il programma</p>
+    <h2 class="reveal night-text" style="font-size:clamp(1.9rem,4.2vw,2.9rem); max-width:18ch; text-transform:none; margin-top:1rem;">Una settimana, cinque calendari.</h2>
+    <p class="reveal" style="font-size:1.02rem; color:rgba(255,255,255,0.5); max-width:58ch; margin-top:1.2rem;">Dal martedì di apertura del Village al lunedì di chiusura. Ecco quando è acceso cosa.</p>
+
+    <div class="gantt reveal">
+      <div class="gantt-grid">
+        <div></div>
+        <div class="day-head">Mar<br>13</div>
+        <div class="day-head">Mer<br>14</div>
+        <div class="day-head">Gio<br>15</div>
+        <div class="day-head">Ven<br>16</div>
+        <div class="day-head">Sab<br>17</div>
+        <div class="day-head">Dom<br>18</div>
+        <div class="day-head">Lun<br>19</div>
+
+        <div class="lane-label">Marketers World</div>
+        <div class="gantt-bar" style="grid-column:5/8; background:var(--tl-blue);"><span class="bar-tag">9&#8211;19</span></div>
+
+        <div class="lane-label">OffWorld</div>
+        <div class="gantt-bar" style="grid-column:2/9; background:var(--tl-teal);"></div>
+
+        <div class="lane-label">Village</div>
+        <div class="gantt-bar" style="grid-column:2/9; background:var(--tl-gold);"></div>
+
+        <div class="lane-label">Afterworld</div>
+        <div class="gantt-bar-wrap" style="grid-column:6/7;">
+          <span class="bar-caption">23&#8211;02</span>
+          <div class="gantt-bar" style="background:var(--magenta);"></div>
+        </div>
+
+        <div class="lane-label">Vertical Meetup</div>
+        <div class="gantt-bar-wrap" style="grid-column:6/7;">
+          <span class="bar-caption">19&#8211;22</span>
+          <div class="gantt-bar" style="background:var(--orange);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- DOVE -->
+<section id="dove" class="section section-night band-line">
+  <div class="wrap">
+    <p class="eyebrow reveal">Dove?</p>
+    <h2 class="reveal night-text" style="font-size:clamp(1.9rem,4.2vw,2.9rem); max-width:18ch; text-transform:none; margin-top:1rem;">Tutto quello che conta, in una mappa.</h2>
+    <p class="reveal" style="font-size:1.02rem; color:rgba(255,255,255,0.5); max-width:58ch; margin:1.2rem 0 2.6rem;">Palacongressi, Village a Viserba, i locali OffWorld e il Coconuts per l'Afterworld. Pin indicativi per zona: indirizzi precisi in arrivo prima dell'evento.</p>
+
+    <div id="mappa" class="reveal"></div>
+
+    <div class="legend reveal">
+      <div><span class="dot" style="background:var(--electric);"></span><span style="color:rgba(255,255,255,0.55); font-size:0.85rem;">Palacongressi</span></div>
+      <div><span class="dot" style="background:var(--acid);"></span><span style="color:rgba(255,255,255,0.55); font-size:0.85rem;">Locali OffWorld</span></div>
+      <div><span class="dot" style="background:var(--sun);"></span><span style="color:rgba(255,255,255,0.55); font-size:0.85rem;">Village, Viserba</span></div>
+      <div><span class="dot" style="background:var(--magenta);"></span><span style="color:rgba(255,255,255,0.55); font-size:0.85rem;">Afterworld, Coconuts</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- CTA -->
+<section class="cta">
+  <div class="wrap" style="position:relative;">
+    <p class="eyebrow reveal" style="color:var(--acid);">Tocca a te</p>
+    <p class="cta-title reveal">Il palco è solo l'inizio della giornata.</p>
+    <p class="sub reveal">Prenota il tuo posto a Marketers World, 16&#8211;18 ottobre a Rimini. OffWorld, Village e Afterworld arrivano con la registrazione.</p>
+    <a href="https://marketersworld.net/#biglietti" class="btn-neon reveal">Prenota il tuo posto &#8594;</a>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <img src="https://marketersworld.net/wp-content/uploads/2023/11/Logo-MarketersWorld-by-wearemarketers.png" alt="Marketers World">
+    <p><a href="https://marketersworld.net" target="_blank" rel="noopener">Marketers World</a> &middot; 16&#8211;18 Ottobre 2026, Rimini</p>
+    <a href="https://wearemarketers.net/privacy-policy/">Privacy Policy</a>
+  </div>
+</footer>
+
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+gsap.timeline({defaults:{ease:'power3.out'}})
+  .to('.hero .reveal', {opacity:1, y:0, duration:0.9, stagger:0.12, delay:0.15});
+
+gsap.utils.toArray('.reveal').forEach(el => {
+  if (el.closest('.hero')) return;
+  gsap.to(el, {
+    opacity:1, y:0, duration:0.7, ease:'power2.out',
+    scrollTrigger:{trigger:el, start:'top 90%', toggleActions:'play none none none'}
+  });
+});
+
+// MAPPA
+const map = L.map('mappa', {scrollWheelZoom:false}).setView([44.0620, 12.5720], 13);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution:'&copy; OpenStreetMap contributors &copy; CARTO',
+  maxZoom:19
+}).addTo(map);
+
+function pin(color){
+  return L.divIcon({
+    className:'',
+    html:`<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid rgba(10,6,18,0.9);box-shadow:0 0 0 2px rgba(255,255,255,0.2), 0 0 12px ${color}88;"></div>`,
+    iconSize:[16,16], iconAnchor:[8,8]
+  });
+}
+
+const luoghi = [
+  {nome:'Palacongressi', desc:'La sede principale di Marketers World', coord:[44.0186,12.5810], colore:'#3DE7FF', maps:'Palacongressi+Rimini'},
+  {nome:'Osteria Delle Poveracce', desc:'OffWorld &middot; Vecchia Pescheria &middot; 10% sul menù', coord:[44.0602,12.5693], colore:'#C6FF3D', maps:'Osteria+Delle+Poveracce%2C+Rimini'},
+  {nome:'Lo Zibaldone', desc:'OffWorld &middot; Vecchia Pescheria &middot; 10% sul menù per chi mangia', coord:[44.0608,12.5698], colore:'#C6FF3D', maps:'Lo+Zibaldone%2C+Rimini'},
+  {nome:'La Marianna', desc:'OffWorld &middot; Borgo San Giuliano &middot; 5% sul menù alla carta, 17&#8211;19 ott', coord:[44.0645,12.5670], colore:'#C6FF3D', maps:'La+Marianna%2C+Borgo+San+Giuliano%2C+Rimini'},
+  {nome:'Pars', desc:'OffWorld &middot; Marina Centro &middot; 10% su tutto', coord:[44.0656,12.5745], colore:'#C6FF3D', maps:'Pars%2C+Viale+Vespucci+12%2Fg%2C+Rimini'},
+  {nome:'Village, Club del Sole', desc:'Camere e roulotte, Viserba', coord:[44.0870,12.5340], colore:'#F4B93E', maps:'Club+del+Sole+Viserba+Rimini'},
+  {nome:'Coconuts', desc:'Afterworld &middot; zona Ruota Panoramica &middot; sabato dalle 23:00', coord:[44.0680,12.5795], colore:'#FF2E93', maps:'Coconuts+Rimini'},
+];
+
+luoghi.forEach(l => {
+  L.marker(l.coord, {icon:pin(l.colore)}).addTo(map).bindPopup(
+    `<b>${l.nome}</b><br>${l.desc}<br><a href="https://www.google.com/maps/search/?api=1&query=${l.maps}" target="_blank" rel="noopener" style="color:#3DE7FF;">Naviga &#8594;</a>`
+  );
+});
+</script>
+
+</body>
+</html>

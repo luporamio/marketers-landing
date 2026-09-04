@@ -4,3 +4,4 @@ Repo pubblica dedicata alle landing page di Marketers World da pubblicare via Gi
 Ogni landing vive nella propria cartella.
 
 - `/verticals/` — Marketers World Verticals
+- `/offworld-afterworld/`: OffWorld & Afterworld MW26
